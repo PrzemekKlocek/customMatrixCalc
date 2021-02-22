@@ -1,0 +1,131 @@
+//        Scanner scanner = new Scanner(System.in);   NIE CHCESZ TEGO MIEĆ W KONSTRUKTORZE, BO GDY CHCESZ WYWOŁAĆ INSTANCJE MATRIX ABY
+//        for(int i=0; i < height; i++){              PRZYKLADOWO TRANSPONOWAĆ MACIERZ, TO KAŻE CI PODAC WSPOLCZYNNIKI BEZ POTRZEBY
+//            float[] fast_list = new float[width];
+//            for(int j = 0; j<width; j++){
+//                System.out.println("Value for cell: Row: " + (i+1) + ", Column: " + (j+1));
+//                float cell = scanner.nextFloat();
+//                fast_list[j] = cell;
+//            }
+//            RowList.add(fast_list) ;
+
+
+    public void fillMatrix() {
+        Scanner scanner = new Scanner(System.in);
+        for (int i = 0; i < height; i++) {
+            float[] fast_list = new float[width];
+            for (int j = 0; j < width; j++) {
+                System.out.println("Value for cell: Row: " + (i + 1) + ", Column: " + (j + 1));
+                float cell = scanner.nextFloat();
+                fast_list[j] = cell;
+            }
+                RowList.add(fast_list);
+        }
+    }
+    
+    
+    //    @Override
+    //    public double Determinant(Matrix matrix) throws MatrixProperSizeException {
+    //        Matrix[] rowEchelonList = rowEchelon(matrix,true);
+    //        matrix = rowEchelonList[0];
+    //        double sign = rowEchelonList[1].RowList.get(0)[0];
+    //        if(matrix.isSquare()){
+    //            double det = 1;
+    //            for(int i =0; i< matrix.height; i++){
+    //                det = det*matrix.RowList.get(i)[i];
+    //            }
+    //            System.out.println("DETERMINANT EQUALS:");
+    //            return det*Math.pow(-1, sign);
+    //        }
+    //        else{
+    //            System.out.println("Determinant is not defined for non-square matrix!");
+    //            throw new MatrixProperSizeException();
+    //        }
+    //    }
+    
+    
+    
+    
+    
+    
+    
+    
+    @Override
+        public Matrix[] rowEchelon(Matrix matrix1, boolean factorsMatrix) throws MatrixProperSizeException {
+            Matrix matrix = matrix1;
+            Matrix[] result = SortZeroRows(matrix);
+            matrix = result[0];
+            int ZeroColumnsCount = 0;
+            for(int i = 0; i< matrix.width; i++) {
+                if(i==matrix.height){
+                    break;
+                }
+                if (!isColumnEmpty(matrix, i)) {
+                    if (matrix.RowList.get(i-ZeroColumnsCount)[i] != 0) {
+                        float factor = matrix.RowList.get(i-ZeroColumnsCount)[i];
+                        for (int j = i - ZeroColumnsCount + 1; j < matrix.height; j++) {
+                            float scalar = matrix.RowList.get(j)[i] / factor;
+                            System.out.println(ZeroColumnsCount);
+                            System.out.println(matrix.RowList.get(j)[i] );
+                            System.out.println(factor);
+                            if (scalar != 0) {
+                                matrix.printMatrix();
+                                System.out.println("oooooooooooooooooo");
+                                matrix.multiplyRow(i-ZeroColumnsCount, scalar);
+                                matrix.subRows(j, i-ZeroColumnsCount);
+                                matrix.multiplyRow(i-ZeroColumnsCount, 1 / scalar);
+                                matrix.printMatrix();
+                                System.out.println("-----------------------");
+                                System.out.println(i);
+                                System.out.println(j);
+                                System.out.println(scalar);
+                                System.out.println("-----------------------");
+    
+                            }
+                        }
+                    }
+    
+                }else{
+                    ZeroColumnsCount+=1;
+                }
+                if(i< matrix.height-1){
+                    matrix = MoveZeros(matrix,i+1);}
+            }
+    
+            // KOD NA DOLE DODAJE NAM POTENCJALNE ZERA NA PRZEKĄTNEJ, CO ZNACZNIE UPRASZCZA LICZENIE WYZNACZNIKA
+            // I JEST KONIECZNE DO ROZKŁAD LU MACIERZY
+            for(int i = 1; i< matrix.height; i++){
+                if(HasZeroBetween(matrix,i)!=0){
+                    int stoppingZero = HasZeroBetween(matrix,i);
+                    System.out.println("stoppingzero:");
+                    System.out.println(stoppingZero);
+                    float first_factor = 0;
+                    int check = 0;
+                    for(int j = 0; j< stoppingZero; j++){
+                        if(matrix.RowList.get(i-1)[j]!=0){
+                            float next_factor = matrix.RowList.get(i)[j] / matrix.RowList.get(i-1)[j];
+                            if(check==0) {
+                                first_factor = matrix.RowList.get(i)[j] / matrix.RowList.get(i-1)[j];
+                                check++;
+                            }
+                            if(next_factor != first_factor){
+                                break;
+                            }
+                        }
+                        if(first_factor!=0){
+                            matrix.multiplyRow(i-1,first_factor);
+                            matrix.subRows(i,i-1);
+                            matrix.multiplyRow(i-1,1/first_factor);
+                            System.out.println("SWAP!");
+                        }
+                    }
+                }
+            }
+    //        float c = result[1].RowList.get(0)[0] ;
+    //        result = SortZeroRows(matrix);
+    //        result[1].RowList.get(0)[0]  = result[1].RowList.get(0)[0] +c;
+            Matrix[] result1 = SortZeroRows(matrix);
+            result[0] = result1[0];
+            result[1].RowList.get(0)[0] = result[1].RowList.get(0)[0] + result1[1].RowList.get(0)[0];
+            result[0].printMatrix();
+            return result;
+        }
